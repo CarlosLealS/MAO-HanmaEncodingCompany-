@@ -1,0 +1,1024 @@
+import java.util.Scanner;  // 
+import java.io.File;  // Reading the files.
+import java.io.FileNotFoundException;  // 
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class Main {
+  public static void main(String[] args) throws IOException {
+    // Main lists.
+    String[] usersL = new String[100];
+    String[] passL = new String[100];
+    int[] hpL = new int[100];
+    int[] attackL = new int[100];          // "Jugadores.txt" lists.
+    int[] defenseL = new int[100];
+    int[] speedL = new int[100];
+    int[] nspellsL = new int[100];
+    int[] xpL = new int[100];
+    
+    String[] spellsL = new String[100];    // "Hechizos.txt" lists.
+    int[] powerL = new int[100];
+    
+    String[] eNames = new String[100];
+	int[] eHPL = new int[100];
+	int[] eAttackL = new int[100];         // "Enemigos.txt" lists.
+	String[] eClassL = new String[100];
+	int[] eSpeedL = new int[100];
+	
+    
+    // Variables.
+    int posPlayer = 0;
+    
+    
+    // Subprograms.
+    int count0 = readPlayers(usersL, passL, hpL, attackL, defenseL, speedL, nspellsL, xpL);  //  Players count.
+    int count1 = readSpells(spellsL, powerL); 												//  Spells count.
+	boolean[][] spellMatrix = readPlayerSpells(usersL, spellsL, count0, count1);		   //  Players x Spells matrix.
+	int count2 = readEnemies(eNames, eHPL, eAttackL, eClassL, eSpeedL);					  //  Enemies count.
+	
+    
+    // Log in.
+    Scanner read = new Scanner(System.in);
+    System.out.println("Welcome to Magic Art Online");
+    boolean check = true;    // Log window breaker.
+    boolean admin = false;  // Log administrator menu.
+    // Log window
+    while(check) {
+    	// Name log
+    	System.out.println("User:");
+    	String user = read.nextLine();  // Input user (load an existent player, run the administrator menu or create a new player).
+    	if (user.equals("Admin")) {  
+    		System.out.println("Password:");   		// Input the password corresponding to the user.
+    		String adminPass = read.nextLine();
+    		if (adminPass.equals("Patata19")) {
+    			admin = true;
+    		// If administrator's password is correct, the cycle ends and prints the admin's menu.
+    			break;
+    		} else {
+    			System.out.println("    ---Wrong password. Try again---");  // The cycle of user repeats if Admin's password is wrong.
+    		}
+    	}
+    	else if (admin == false) {             // "Admin" not entered.
+	    	for(int x = 0; x < count0; x++) {
+	    		if(usersL[x].equals(user) ) {
+	    			posPlayer = x;
+	    			boolean passStop = true;
+	    			// Password retry
+	    			while(passStop) {
+	    				System.out.println("Password:");
+	    				String pass = read.nextLine();
+	    				if(passL[x].equals(pass)) {
+	    					System.out.println("    ---Succesful login---");
+	    					check = false;
+	    					passStop = false;
+	    					// Showing player statistics.
+	    					System.out.println("****// " + usersL[x] + " //****");
+	    					System.out.println("                        Spells learned: --" + nspellsL[x] + "--");
+	    					System.out.println("");
+	    					System.out.println("Health points: --" + hpL[x] + "--");
+	    					System.out.println("Atack points: --" + attackL[x] + "--");
+	    					System.out.println("Defense points: --" + defenseL[x] + "--");
+	    					System.out.println("Speed points: --" + speedL[x] + "--");
+	    					System.out.println("Experience points: --" + xpL[x] + "--");
+	    				}
+	    				// Exit of password retry
+	    				if (passStop) {
+	    					System.out.println("Change user? (y/n)");
+	    					String changeAccount = read.nextLine();
+	    					if(changeAccount.toLowerCase().equals("y")) {
+	    						passStop = false;
+	    					}
+	    				}
+	    			}
+	    		}
+	    	}
+	    	if(check != false) {
+	    		System.out.println("******//  Create new acount (Sign)  //******");
+	    		System.out.println("*****//      Log again (Retry)    //******");
+	    		String retrylog = read.nextLine();
+	    		if(retrylog.toLowerCase().equals("sign")) {
+	    			// Sign in a new player
+	    			boolean confPass = true;
+	    			while (confPass) { 
+	    				System.out.println("Create a Username:"); 
+	    				String signIn = read.nextLine();
+	    				System.out.println("Your username is: " + signIn + ". Confirm? (y/n)");
+	    				String checkSignIn = read.nextLine();
+	    				if(checkSignIn.toLowerCase().equals("y")) {
+	    					usersL[count0] = signIn;
+	    					confPass = false;
+	    				}
+	    			}
+	    			// Confirm password
+	    			while (confPass == false) {
+	    				System.out.println("Create password:"); 
+	    				String signPass = read.nextLine();
+	    				System.out.println("Confirm password:"); 
+	    				String signPassConf = read.nextLine();
+	    				if(signPass.equals(signPassConf)) {
+	    					confPass = true;
+	    					passL[count0] = signPass;
+	    				}
+	    				else {
+	    					System.out.println("     ---Passwords do not match---");
+	    					System.out.println("");
+	    				}
+	    			}
+	    			// Initial stats
+	    			int initialHP = 10;
+	    			int initialAtk = 10;
+	    			int initialDef = 10;
+	    			int initialSpeed = 10;
+	    			int initialNumSpells = 2;
+	    			int initialXP = 1500;
+		  		  
+	    			// Adding player stats
+	    			hpL[count0] = initialHP;
+	    			attackL[count0] = initialAtk;
+	    			defenseL[count0] = initialDef;
+	    			speedL[count0] = initialSpeed;
+	    			nspellsL[count0] = initialNumSpells;
+	    			xpL[count0] = initialXP;
+		  		  
+	    			// Showing new player stats
+	    			System.out.println("****// " + usersL[count0] + " //****");
+	    			System.out.println("                        Spells learned: --" + nspellsL[count0] + "--");
+	    			System.out.println("");
+		  			System.out.println("Health points: --" + hpL[count0] + "--");
+		  			System.out.println("Atack points: --" + attackL[count0] + "--");
+		  			System.out.println("Defense points: --" + defenseL[count0] + "--");
+		  			System.out.println("Speed points: --" + speedL[count0] + "--");
+		  			System.out.println("Experience points: --" + xpL[count0] + "--");
+		  			check = false;
+	    		}
+	    		// Back to log
+	    		if(retrylog.toLowerCase().equals("retry")) {
+	    			System.out.println("--- Input a valid user ---"); }
+	    	}
+    	}
+    }
+    if (admin == false) {
+	    System.out.println("");
+	    System.out.println("=========================================");
+	    System.out.println("");
+	    System.out.println("Welcome back " + usersL[posPlayer] + "! What do you want to do?");
+	    System.out.println("");
+	    System.out.println("   [1] Fight an enemy.");
+	    System.out.println("   [2] Learn a spell.");
+	    System.out.println("   [3] View players stats.");
+	    System.out.println("   [4] View spells stats.");
+	    System.out.println("   [5] See ranking of players with most experience.");
+	    System.out.println("   [6] Sign off.");
+	    boolean verif = true;
+	    int availableSpells = count1;
+	    
+	    
+	    while(verif) {
+	    	System.out.println("");
+	    	System.out.println("Option:");
+	        String option = read.nextLine();
+	        
+		    if(option.equals("1")) {
+		    	// PvE or PvP.
+		    	boolean sigueJugando = true;
+
+		    	while(sigueJugando) {
+		    		System.out.println("");
+		    		System.out.println("PvE or PvP? (write -None- to close):");
+		    		String fight = read.nextLine();
+		    		//
+		    		//
+		    		int enemyCount = 0;
+		    		//
+		    		//
+		    		String[] rEnemyL = new String[100];
+		    		int[] rEnemyHPL = new int[100];
+		    		int[] rEnemyAttackL = new int[100];          // Random enemies lists.
+		    		String[] rEnemyClassL = new String[100];
+		    		int[] rEnemySpeedL = new int[100];
+		    		//
+		    		//
+		    		if (fight.toLowerCase().equals("pve")) {
+		    			System.out.println("");
+		    			String rEnemy = randomEnemy();
+		    			
+		    			for (int x = 0; x < count2; x++) {
+		    				if (eClassL[x].equals(rEnemy)) {
+		    					rEnemyL[enemyCount] = eNames[x];
+		    					rEnemyHPL[enemyCount] = eHPL[x];
+		    					rEnemyAttackL[enemyCount] = eAttackL[x];
+		    					rEnemyClassL[enemyCount] = eClassL[x];
+		    					rEnemySpeedL[enemyCount] = eSpeedL[x];
+		    					enemyCount++;
+		    				}
+		    			}
+		    			int randomEnemyNumber = (int) (Math.random()*enemyCount);
+		    			
+		    			System.out.print(" - " + rEnemyL[randomEnemyNumber]);
+		    			System.out.println();
+		    			System.out.println("|| HP: " + rEnemyHPL[randomEnemyNumber] + "   ATK: " + rEnemyAttackL[randomEnemyNumber] + "   Speed: " + rEnemySpeedL[randomEnemyNumber] + " ||");
+		    			System.out.println("");
+		    			boolean alive = true;
+		    			
+		    			while (alive) {
+		    				boolean yourTurn = false;
+		    				
+		    				if (rEnemySpeedL[randomEnemyNumber] > speedL[posPlayer]) {
+			    				int eAtk = rEnemyAttackL[randomEnemyNumber] - defenseL[posPlayer];
+			    				
+			    				
+
+			    				if (eAtk > 0) {
+			    					System.out.println("   ---" + rEnemyL[randomEnemyNumber] + " attacked and dealed you " + eAtk + " damage---");
+			   						if ((hpL[posPlayer] - eAtk) <= 0) {
+			   							System.out.println("");
+			   							System.out.println("                  ---You DIED---");
+			   							alive = false;
+		    						}
+		    					}			    					
+			    				else {
+		    						System.out.println("   ---" + rEnemyL[randomEnemyNumber] + " attacked first and dealed you 0 damage.");
+			    				}
+			    			}
+		    				else {
+		   						System.out.println("     ---It's your turn! How do you want to attack?---");
+		    					System.out.println("");
+		    					System.out.println("          [B] Basic attack     [S] Spell attack");
+		    					boolean out = false;
+			    					
+		    					while (out == false) {
+				    				System.out.println("");
+				    				System.out.println("Attack Option:");
+				    				String atkOption = read.nextLine();
+				   					
+				   					if (atkOption.toLowerCase().equals("b")) { 
+				   						out = basicPVE(hpL, attackL, defenseL, speedL, posPlayer, read, rEnemyHPL,
+												rEnemyClassL, randomEnemyNumber);
+			    					}
+			    					else if (atkOption.toLowerCase().equals("s")) {
+			    						System.out.println("");
+			    						System.out.println("     ---Choose a spell from your list---");
+			    						System.out.println("");
+			    						
+			    						int counter = 0;
+			    						String[] playerSpells = new String[100];
+			    						int[] spellsPower = new int[100];
+			    						
+			    						for (int i = 0; i < count1; i++) {
+			    							if (spellMatrix[posPlayer][i] == true) {
+			    								playerSpells[counter] = spellsL[i];
+			    								spellsPower[counter] = powerL[i];
+			    								System.out.println("            [" + (counter + 1) + "] " + spellsL[i]);
+			    								counter++;
+			    							}
+			    						}
+			    						System.out.println("");
+			    						System.out.println("Spell Option:");
+			    						int spellOption = read.nextInt();
+			    						read.nextLine();
+			    						
+			    						while (spellOption <= 0 || spellOption > counter) {
+			    							System.out.println("     ---Input a valid option---");
+			    							System.out.println("");
+				    						System.out.println("Spell Option:");
+				    						spellOption = read.nextInt();
+				    						read.nextLine();
+			    						}
+			    						System.out.println("");
+			    						System.out.println("     ---" + playerSpells[counter - 1] + " used. Made " + spellsPower[counter - 1] + " damage---");
+			    						
+			    						rEnemyHPL[randomEnemyNumber] -= spellsPower[counter - 1];
+			    						
+			    						if (rEnemyHPL[randomEnemyNumber] <= 0) {
+			    							System.out.println("         °° Enemy has 0 HP left °°");
+			    							out = true;
+			    						}
+			    						else {
+			    							System.out.println("         °° Enemy has " + rEnemyHPL[randomEnemyNumber] + " HP left °°");
+			    						}
+			    					}
+				    				else {
+				    					System.out.println();
+				    					System.out.println("           ---Input a valid attack---");
+				    				}
+			    				}
+		    				}				
+		    				//
+		    				//
+		    				if (rEnemyHPL[randomEnemyNumber] <= 0) {
+		    					alive = false;
+		    				}
+		    			}
+		    		}
+		    		else if (fight.toLowerCase().equals("pvp")) {
+		    			String user = usersL[posPlayer];
+		    			pvp(read, usersL, user, count0, hpL, speedL, attackL, defenseL, spellMatrix, count1, spellsL, nspellsL, powerL, xpL);
+		    		}
+		    		else if (fight.toLowerCase().equals("none")){
+		    			sigueJugando = false;
+		    		}
+		    		else {
+		    			System.out.println("");
+		    			System.out.println("   ---Input a valid option---");
+		    		}
+		    	}
+		    }
+		    if(option.equals("2")) {
+		    	// Learn a spell.
+		    	learnNewSpell(nspellsL, xpL, spellsL, posPlayer, count1, spellMatrix, availableSpells);
+		    }
+		    if(option.equals("3")) {
+		    	// View players statistics.
+		    	System.out.println("");
+		    	System.out.println("Input the player's name you want to check stats:");
+		    	String player = read.nextLine();
+		    	showPlayer(usersL, hpL, attackL, defenseL, speedL, nspellsL, xpL, player, count0);
+		    }
+		    if(option.equals("4")) {
+		    	// View spell statistics.
+		    	System.out.println("");
+		    	System.out.println("Input the name of the spell you want to check:");
+		    	String spell = read.nextLine();
+		    	showSpell(spell, spellsL, powerL, count1);
+		    }
+		    if(option.equals("5")) {
+		    	// Players ranking, based on Experience Points.
+		    	xpRank(count0, xpL, usersL, passL, hpL, attackL, defenseL, speedL, nspellsL, spellMatrix, count1);
+		    }
+		    if(option.equals("6")) {
+		    	// Sign off //
+		    	verif = false;
+		    	System.out.println("");
+		        System.out.println("See you next time..");
+		    }
+		    if(!option.equals("1") && !option.equals("2") && !option.equals("3") && !option.equals("4") && !option.equals("5") && !option.equals("6")) {
+		    	// Wrong input.
+		    	System.out.println("	----Input an available option----");
+		    }
+		}
+    }
+    else if (admin) {
+    	System.out.println("");
+	    System.out.println("=========================================");
+	    System.out.println("");
+	    System.out.println("Welcome back Admin! What do you want to do?");
+	    System.out.println("");
+	    System.out.println("   [1] Delete a player.");
+	    System.out.println("   [2] Add an enemy.");
+	    System.out.println("   [3] Add a spell.");
+	    System.out.println("   [4] View all players stats.");
+	    System.out.println("   [5] Sign off.");
+	    boolean verifAdmin = true;
+	    
+	    while (verifAdmin) {
+	    	System.out.println("");
+	    	System.out.println("Option:");
+	    	String option = read.nextLine();
+	        
+	        if (option.equals("1")) {
+	        	// Delete a player.
+	        	System.out.println("");
+	        	System.out.println("Input the player you want to delete:");
+	        	String player = read.nextLine();
+	        	boolean playerDeleted = deletePlayer(usersL, passL, hpL, attackL, defenseL, speedL, nspellsL, xpL, player, count0, count1, spellMatrix);
+	        		
+	        	if (playerDeleted) {
+	        		count0--;
+	        	}
+	        }
+	        if (option.equals("2")) {
+	        	// Add an enemy.
+	        	System.out.println("");
+	        	System.out.println("Input the enemy you want to add:");
+	        	String enemy = read.nextLine();
+	        	boolean enemyAdded = addEnemy(enemy, count2, eNames, eHPL, eAttackL, eClassL, eSpeedL, read);
+	        	
+	        	if (enemyAdded) {
+	        		count2++;
+	        		System.out.println("");
+	        		System.out.println("   ---" + enemy + " added succesfully---");
+	        	} else {
+	        		System.out.println("");
+	        		System.out.println("   ---Enemy already exists in the game---");
+	        		System.out.println("      ---Input a non-existent enemy---");
+	        	}
+	        }
+	        if (option.equals("3")) {
+	        	// Add a spell.
+	        	System.out.println("");
+	        	System.out.println("Input the spell you want to add:");
+	        	String spell = read.nextLine();
+	        	boolean spellAdded = addSpell(spell, spellsL, powerL, count1, read);
+	        	
+	        	if (spellAdded) {
+	        		count1++;
+	        		System.out.println("   ---" + spell + " added succesfully---");
+	        	} else {
+	        		System.out.println("");
+	        		System.out.println("   ---Spell already exists in the game---");
+	        		System.out.println("      ---Input a non-existent spell---");
+	        	}
+	        }
+	        if (option.equals("4")) {
+	        	// Show all player's statistics.
+	        	showAllPlayers(count0, usersL, hpL, attackL, defenseL, speedL, nspellsL, xpL);
+	        }
+	    	if (option.equals("5")) {
+	    		// Sign off //
+	    		verifAdmin = false;
+	    		System.out.println("");
+		        System.out.println("See you next time..");
+	    	}
+	    	if (!option.equals("1") && !option.equals("2") && !option.equals("3") && !option.equals("4") && !option.equals("5")) {
+		    	// Wrong input.
+	    		System.out.println("	----Input an available option----");
+	    	}
+	    }
+    }
+    // Saving all the changes done while the program was running.
+    saveChanges(count0, usersL, passL, hpL, attackL, defenseL, speedL, nspellsL, xpL, spellsL, powerL, count1, spellMatrix, count2, eNames, eHPL, eAttackL, eClassL, eSpeedL);
+  }
+
+//Reading "Enemigos.txt"
+public static int readEnemies(String[] eNames, int[] eHPL, int[] eAttackL, String[] eClassL, int[] eSpeedL) throws FileNotFoundException {
+	Scanner arch3 = new Scanner(new File("Enemigos.txt"));
+	int count2 = 0;
+	
+	while(arch3.hasNextLine()) {
+		String[] parts3 = arch3.nextLine().split(", ");
+		String eName = parts3[0];
+		int eHP = Integer.parseInt(parts3[1]);
+		int eAttack = Integer.parseInt(parts3[2]);
+		String eClass = parts3[3];
+		int eSpeed = Integer.parseInt(parts3[4]);
+				
+		eNames[count2] = eName;
+		eHPL[count2] = eHP;
+		eAttackL[count2] = eAttack;
+		eClassL[count2] = eClass;
+		eSpeedL[count2] = eSpeed;
+		count2++;
+	}	
+	arch3.close();
+	return count2;
+}
+
+//Reading "HechizosJugadores.txt"
+public static boolean[][] readPlayerSpells(String[] usersL, String[] spellsL, int count0, int count1) throws FileNotFoundException {
+	boolean[][] spellMatrix = new boolean[100][100];
+	Scanner arch2 = new Scanner(new File("HechizosJugadores.txt"));
+	
+	while(arch2.hasNextLine()) {
+		String[] parts2 = arch2.nextLine().split(", ");
+		spellMatrix[index(usersL, parts2[0], count0)][index(spellsL, parts2[1], count1)] = true;
+	}
+	arch2.close();
+	return spellMatrix;
+}
+
+//Reading "Hechizos.txt"
+public static int readSpells(String[] spellsL, int[] powerL) throws FileNotFoundException {
+	Scanner arch1 = new Scanner(new File("Hechizos.txt"));
+	int count1 = 0;
+	
+	while(arch1.hasNextLine()) {
+		String[] parts1 = arch1.nextLine().split(",");
+		String spell = parts1[0];
+		int power = Integer.parseInt(parts1[1]);
+				
+		spellsL[count1] = spell;
+		powerL[count1] = power;
+		count1++;
+	}
+	arch1.close();
+	return count1;
+}
+
+//Reading "Jugadores.txt"
+public static int readPlayers(String[] usersL, String[] passL, int[] hpL, int[] attackL, int[] deffenseL, int[] speedL,
+		int[] nspellsL, int[] xpL) throws FileNotFoundException {
+    Scanner arch0 = new Scanner(new File("Jugadores.txt"));
+    int count0 = 0;
+    while(arch0.hasNextLine()) {
+      String[] parts0 = arch0.nextLine().split(", ");
+      String userList = parts0[0];
+      String password = parts0[1];
+      Integer hp = Integer.parseInt(parts0[2]);
+      Integer atk = Integer.parseInt(parts0[3]);
+      Integer def = Integer.parseInt(parts0[4]);
+      Integer speed = Integer.parseInt(parts0[5]);
+      Integer numberOfSpells = Integer.parseInt(parts0[6]);
+      Integer exp = Integer.parseInt(parts0[7]);
+      // 
+      usersL[count0] = userList;
+      passL[count0] = password;
+      hpL[count0] = hp;
+      attackL[count0] = atk;
+      deffenseL[count0] = def;
+      speedL[count0] = speed;
+      nspellsL[count0] = numberOfSpells;
+      xpL[count0] = exp;
+      count0++;
+    }
+    arch0.close();
+	return count0;
+}
+
+
+
+public static int index(String list[],String element, int count) {
+			int i;
+			for(i = 0; i < count; i++) {
+				if(list[i].equals(element)) {
+					break;
+				}	
+			}
+			if(i == count) {
+				return -1;
+			}
+			else {
+				return i;
+			}
+		}
+  
+public static void showSpell(String spell, String[] spellsL,int[] powerL, int count1) {
+			if (index(spellsL, spell, count1) != -1) {
+				System.out.println("");
+				System.out.println(spell + " has " + powerL[index(spellsL, spell, count1)] + " attack power.");
+				}
+			else {
+				System.out.println("");
+				System.out.println("Spell not found, please enter a valid spell.");
+			}
+		}
+
+public static void showPlayer(String[] usersL, int[] hpL, int[] attackL, int[] defenseL, int[] speedL, int[] nspellsL, int[] xpL, String player, int count0) {
+			if (index(usersL, player, count0) != 1) {
+				System.out.println("");
+				System.out.println(usersL[index(usersL, player, count0)] + " | HP: " + hpL[index(usersL, player, count0)] + " | A: " + attackL[index(usersL, player, count0)] + " | D: " + defenseL[index(usersL, player, count0)] + " | S: " + speedL[index(usersL, player, count0)] + " | N° Spells: " + nspellsL[index(usersL, player, count0)] + " | XP: " + xpL[index(usersL, player, count0)]);
+			}
+			else {
+				System.out.println("");
+				System.out.println("Player not found, please enter a valid player:");
+			}
+		}
+  
+public static boolean deletePlayer(String[] usersL, String[] passL, int[] hpL, int[] attackL, int[] defenseL, int[] speedL, int[] nspellsL, int[] xpL, String player,int count0, int count1, boolean[][] spellMatrix) {
+	int j = index(usersL, player, count0);
+	if(j != -1) {
+		for(int k = j; k < count0; k++) {
+			usersL[k] = usersL[k + 1];
+			passL[k] = passL[k + 1];
+			hpL[k] = hpL[k + 1];
+			attackL[k] = attackL[k + 1];
+			defenseL[k] = defenseL[k + 1];
+			speedL[k] = speedL[k + 1];
+			nspellsL[k] = nspellsL[k + 1];
+			xpL[k] = xpL[k + 1];
+			for(int l = 0; l < count1; l++) {
+				spellMatrix[k][l] = spellMatrix[k + 1][l];
+			}
+		}
+		System.out.println("");
+		System.out.println("Player successfully eliminated.");
+		return true;
+	}
+	else {
+		System.out.println("");
+		System.out.println("Player doesn't exist, please enter a valid name.");
+		return false;
+	}
+}
+
+public static void showAllPlayers(int count0, String[] usersL, int[] hpL, int[] attackL, int[] defenseL, int[] speedL, int[] nspellsL, int[] xpL) {
+	System.out.println("");
+	for(int i = 0; i < count0; i++) {
+		System.out.println(usersL[i] + " | HP: " + hpL[i] + " | A: " + attackL[i] + " | D: " + defenseL[i] + " | S: " + speedL[i] + " | N° Spells: " + nspellsL[i] + " | XP: " + xpL[i]);	
+	}
+}
+
+public static boolean addEnemy(String enemy, int count2, String[] eNames, int[] eHPL, int[] eAttackL, String[] eClassL, int[] eSpeedL, Scanner read) {
+	int i;
+	for(i = 0; i < count2; i++) {
+		if(eNames[i].equals(enemy)) {
+			break;
+		}
+	}
+	if (i == count2) {
+		eNames[i] = enemy;
+		System.out.println("HP:");
+		eHPL[i] = read.nextInt();
+		System.out.println("Attack:");
+		eAttackL[i] = read.nextInt();
+		System.out.println("Class:");
+		read.nextLine();
+		eClassL[i] = read.nextLine();
+		System.out.println("Speed:");
+		eSpeedL[i] = read.nextInt();
+		read.nextLine();
+
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+public static boolean addSpell(String spell, String[] spellsL, int[] powerL, int count1, Scanner read) {
+	int i;
+	for (i = 0; i < count1; i++) {
+		if (spellsL[i].equals(spell)) {
+			break;
+		}
+	}
+	if (i == count1) {
+		spellsL[i] = spell;
+		System.out.println("Power:");
+		powerL[i] = read.nextInt();
+		read.nextLine();
+		return true;
+	} else {
+		return false;
+	  }
+}
+
+public static void xpRank(int count0, int[] xpL, String[] usersL, String[] passL, int[] hpL, int[] attackL, int[] defense, int[] speedL, int[] nspellsL, boolean[][] spellMatrix, int count1) {
+	
+	for(int i = 0; i < count0-1; i++) {
+		for(int j=i+1; j < count0;j++) {
+			if(xpL[i] < xpL[j]) {
+				int aux0 = xpL[i];
+				xpL[i] = xpL[j];
+				xpL[j] = aux0;
+				
+				String aux1 = usersL[i];
+				usersL[i] = usersL[j];
+				usersL[j] = aux1;
+				
+				String aux2 = passL[i];
+				passL[i] = passL[i];
+				passL[i] = aux2;
+				
+				int aux3 = hpL[i];
+				hpL[i] = hpL[j];
+				hpL[j] = aux3;
+				
+				int aux4 = attackL[i];
+				attackL[i] = attackL[j];
+				attackL[j] = aux4;
+				
+				int aux5 = defense[i];
+				defense[i] = defense[j];
+				defense[j] = aux5;
+				
+				int aux6 = speedL[i];
+				speedL[i] = speedL[j];
+				speedL[j] = aux6;
+				
+				int aux7 = nspellsL[i];
+				nspellsL[i] = nspellsL[j];
+				nspellsL[j] = aux7;
+				
+				for(int c = 0; c < count1; c++) {
+					boolean auxM = spellMatrix[i][c];
+					spellMatrix[i][c] = spellMatrix[j][c];
+					spellMatrix[j][c] = auxM;
+				}
+				
+			}
+		}
+	}
+	System.out.println("==================================================");
+	System.out.println("		 Top 10 players with more xp");
+	System.out.println("==================================================");
+	for(int k=0; k < 10; k++) {
+		System.out.println("|| "+usersL[k]+" || "+xpL[k]+" ||");
+	}
+}
+
+public static void learnNewSpell(int[] nspellsL, int[] xpL, String[] spellsL, int posPlayer, int count1,
+		boolean[][] spellMatrix, int availableSpells) {
+	boolean haveSpell = false;
+	int spellsLeft = count1;
+	
+	if(xpL[posPlayer] >= 1000) {
+		for(int i = 0; i < count1; i++) {
+			if (spellMatrix[posPlayer][i] == true) {
+				spellsLeft--;
+			}
+		}
+		if (spellsLeft != 0) {
+			while(haveSpell == false) {
+		    	int randomSpell = (int) (Math.random()*availableSpells);
+			    		
+				if (spellMatrix[posPlayer][randomSpell] == false) {
+					spellMatrix[posPlayer][randomSpell] = true;
+					xpL[posPlayer] -= 1000;
+					nspellsL[posPlayer] += 1;
+					
+					System.out.println("    ---" + spellsL[randomSpell] + " added to your spell's list---");
+					System.out.println("    ---1000 experience points gone.. (" + xpL[posPlayer] + " XP left)---");
+					haveSpell = true;
+				}
+			}
+		}	    		
+		else {
+			System.out.println("        ---All spells learned---");
+		}
+	}
+	else {
+		System.out.println("	---Not enough xp to learn a spell---");
+	}
+}
+
+public static String randomEnemy() {
+	int a = (int) (Math.random()*161); 
+	
+	if (a < 75) {
+		System.out.print("Enemy Class F");
+		return "F";
+	} else if (a < 125 && a >= 75) {
+		System.out.print("Enemy Class C");
+		return "C";
+	} else if (a < 150 && a >= 125) {
+		System.out.print("Enemy Class B");	
+		return "B";
+	} else if (a < 160 && a >= 150) {
+		System.out.print("Enemy Class A");	
+		return "A";
+	} else if (a == 160) {
+		System.out.print("Enemy Class S");	
+		return "S";
+    }
+	return "";
+}
+
+private static boolean basicPVE(int[] hpL, int[] attackL, int[] defenseL, int[] speedL, int posPlayer, Scanner read,
+		int[] rEnemyHPL, String[] rEnemyClassL, int randomEnemyNumber) {
+	boolean out;
+	rEnemyHPL[randomEnemyNumber] -= attackL[posPlayer];
+	System.out.println("");
+	if (rEnemyHPL[randomEnemyNumber] > 0) {
+		System.out.println("   ---Basic attack done! Enemy has " + rEnemyHPL[randomEnemyNumber] + " HP left---");				   							
+	}
+	else {
+		System.out.println("   ---Basic attack done! Enemy has 0 HP left---");
+		System.out.println("                 ---PvE done---");
+		System.out.println("");
+		int statsPoints = 0;
+		
+		if (rEnemyClassL[randomEnemyNumber].equals("S")) {
+			statsPoints = 20;
+			System.out.println(" ---You won 20 stats points. What do you want to upgrade?---");
+		}
+		else if (rEnemyClassL[randomEnemyNumber].equals("A")) {
+			statsPoints = 10;
+			System.out.println(" ---You won 10 stats points. What do you want to upgrade?---");
+		}
+		else if (rEnemyClassL[randomEnemyNumber].equals("B")) {
+			statsPoints = 5;
+			System.out.println(" ---You won 5 stats points. What do you want to upgrade?---");
+		}
+		else if (rEnemyClassL[randomEnemyNumber].equals("C")) {
+			statsPoints = 2;
+			System.out.println(" ---You won 2 stats points. What do you want to upgrade?---");
+		}
+		else if (rEnemyClassL[randomEnemyNumber].equals("F")) {
+			statsPoints = 1;
+			System.out.println(" ---You won 1 stats points. What do you want to upgrade?---");
+		}
+		System.out.println("");
+		System.out.println("     ||  [H] Health   [A] ATK   [D] DEF   [S] SPE  ||");
+		boolean upgradeBoolean = true;
+		
+		while (upgradeBoolean) {
+			if (statsPoints > 0) {
+				System.out.println("");
+				System.out.println("Upgrade:");
+				String upgrade = read.nextLine();
+				System.out.println(statsPoints + " points left. How many would you like to add?");
+				int points = read.nextInt();
+				read.nextLine();
+				
+				while (points > statsPoints || points < 0) {
+					System.out.println("            ---Input a valid amount of stats points---");
+					System.out.println("");
+					System.out.println(statsPoints + " points left. How many would you like to add?");
+					points = read.nextInt();
+					read.nextLine();
+				}
+				if (upgrade.toLowerCase().equals("h")) {
+					hpL[posPlayer] += points;
+					statsPoints -= points;
+				}
+				else if (upgrade.toLowerCase().equals("a")) {
+					attackL[posPlayer] += points;
+					statsPoints -= points;
+				}
+				else if (upgrade.toLowerCase().equals("d")) {
+					defenseL[posPlayer] += points;
+					statsPoints -= points;
+				}
+				else if (upgrade.toLowerCase().equals("s")) {
+					speedL[posPlayer] += points;
+					statsPoints -= points;
+				}
+				System.out.println("      ---Stats points added succesfully---");
+			}
+			else {
+				upgradeBoolean = false;
+			}
+		}
+	}
+	out = true;
+	return out;
+}
+
+public static void pvp(Scanner read, String[] usersL, String user, int count0, int[] hpL, int[] speedL, int[] attackL, int[] defenseL, boolean[][] spellMatrix, int count1, String[] spellsL, int[] nspellsL, int[] powerL, int[] xpL) {
+	int posP1 = index(usersL,user,count0);
+	int posP2 = (int) (Math.random()*count0);
+	
+	while(posP2 == posP1) {
+		posP2 = (int) (Math.random()*count0);
+	}
+	
+	int hpP1 = hpL[posP1];
+	int hpP2 = hpL[posP2];
+	
+	int attP1 = attackL[posP1];
+	int attP2 = attackL[posP2];
+	
+	int defP1 = defenseL[posP1];
+	int defP2 = defenseL[posP2];
+	
+	int speedP1 = speedL[posP1];
+	int speedP2 = speedL[posP2];
+	
+	int nSpellsP1 = nspellsL[posP1];
+	
+	String spellsP1[] = new String[100];
+	
+	for(int i = 0; i < count1; i++) {
+		int a = 0;
+		if (spellMatrix[posP1][i] == true) {
+			spellsP1[a] = spellsL[i];
+		}
+	}
+	System.out.println("=== Your opponent is: " + usersL[posP2] + " ===");
+	
+	if(speedP1 > speedP2) {
+		while(hpP1 > 0 && hpP2 > 0) {
+			System.out.println("You will use a basic attack [B] or a magic spell [S] ?");
+			String att = read.nextLine();
+			while(!att.equals("B") && !att.equals("S")) {
+				System.out.println("Please enter a valid character ( [B] or [S] )");
+				att = read.nextLine();
+			}
+			while(nSpellsP1 == 0) {
+				System.out.println("You don't have spells, the default attack will be used.");
+				att = "B";
+			}
+			if (att.equals("B")) {
+				int attDMG = (attP1-defP2);
+				if(attDMG > 0) {
+					System.out.println("Your attack made him " + attDMG + " points of damage");
+					hpP2 -= attDMG;
+				}else {
+					System.out.println("The enemy has a lot of defense, your attack did no damage");
+				}
+			}
+			if(att.equals("S")) {
+				for(int k = 0; k < nSpellsP1; k++) {
+					System.out.println("[" + (k + 1) + "] " + spellsP1[k]);
+				}
+				int chosenSpell = read.nextInt();
+				
+				while(chosenSpell - 1 > nSpellsP1 || chosenSpell - 1 < 0) {
+					System.out.println("Please enter a valid number");
+					chosenSpell = read.nextInt();
+				}
+				read.nextLine();
+				int spellDMG = powerL[index(spellsL,(spellsP1[chosenSpell-1]),count1)] - defP2;
+				if (spellDMG > 0) {
+				System.out.println("Your spell made him "+spellDMG+" points of damage");
+				hpP2 -= spellDMG;
+				}else {
+					System.out.println("The enemy has a lot of defense ,your spell did no damage");
+				}
+			}
+			
+			if(hpP2 < 0) {
+				break;
+			}else {
+				int eDMG = (attP2 - defP1);
+				if(eDMG > 0) {
+					System.out.println(usersL[posP2] + " has damaged you (" + eDMG + ")");
+					hpP1 -= eDMG;
+				} else {
+					System.out.println("You have a lot of defense, your opponent didn't hurt you.");
+				}
+			}	
+		}		
+	}
+	else {
+		while(hpP1 > 0 && hpP2 > 0) {
+			int eDMG = (attP2 - defP1);
+			if(eDMG > 0) {
+				System.out.println(usersL[posP2] + " has damaged you (" + eDMG + ")");
+				hpP1 -= eDMG;
+			}else {
+				System.out.println("You have a lot of defense, your opponent didn't hurt you.");
+			}
+			if(hpP1 < 0) {
+				break;
+			}else {
+				System.out.println("You will use a basic attack [B] or a magic spell [S] ?");
+				String att = read.nextLine();
+				while(!att.equals("B") && !att.equals("S")) {
+					System.out.println("Please enter a valid character ( [B] or [S] )");
+					att = read.nextLine();
+				}
+				while(nSpellsP1 == 0) {
+					System.out.println("You don't have spells, the default attack will be used.");
+					att = "B";
+				}
+				if (att.equals("B")) {
+					int attDMG = (attP1-defP2);
+					if(attDMG > 0) {
+						System.out.println("Your attack made him "+attDMG+" points of damage.");
+						hpP2 -= attDMG;
+					}else {
+						System.out.println("The enemy has a lot of defense, your attack did no damage.");
+					}
+				}
+				if(att.equals("S")) {
+					for(int k = 0; k < nSpellsP1; k++) {
+						System.out.println("[" + (k + 1) + "] " + spellsP1[k]);
+					}
+					
+					int chosenSpell = read.nextInt();
+					while(chosenSpell - 1 > nSpellsP1 || chosenSpell - 1 < 0) {
+						System.out.println("Please enter a valid number.");
+						chosenSpell = read.nextInt();
+					}
+					read.nextLine();
+					int spellDMG = powerL[index(spellsL,(spellsP1[chosenSpell-1]),count1)] - defP2;
+					if (spellDMG > 0) {
+					System.out.println("Your spell made him "+spellDMG+" points of damage");
+					hpP2 -= spellDMG;
+					}else {
+						System.out.println("The enemy has a lot of defense ,your spell did no damage");
+					}
+				}
+			}
+		}	
+	}
+	System.out.println("================================");
+	System.out.println("=======The battle is over=======");
+	System.out.println("================================");
+	if(hpP1 < 0) {
+		System.out.println("You've lost, good luck next time!");
+		xpL[posP2] += 250; 
+	}else {
+		System.out.println("Congratulations, you've won 250 XP.");
+		xpL[posP1] += 250; 
+	}
+}
+
+public static void saveChanges(int count0, String[] usersL, String[] passL, int[] hpL, int[] attackL, int[] defenseL, int[] speedL, int[] nspellsL, int[] xpL, String[] spellsL, int[] powerL, int count1, boolean[][] spellMatrix, int count2, String[] eNames, int[] eHPL, int[] eAttackL, String[] eClassL, int[] eSpeedL) throws IOException {
+	
+	FileWriter save0 = new FileWriter(new File("Jugadores.txt"));
+	for(int i = 0; i < count0; i++) {
+		save0.write(usersL[i]+", "+passL[i]+", "+String.valueOf(hpL[i])+", "+String.valueOf(attackL[i])+", "+String.valueOf(defenseL[i])+", "+String.valueOf(speedL[i])+", "+String.valueOf(nspellsL[i])+", "+String.valueOf(xpL[i]));
+		save0.write("\r\n");
+	}
+	save0.close();
+	
+	FileWriter save1 = new FileWriter(new File("Hechizos.txt"));
+	for(int i = 0; i < count1; i++) {
+		save1.write(spellsL[i]+","+String.valueOf(powerL[i]));
+		save1.write("\r\n");
+	}
+	save1.close();
+	
+	FileWriter save2 = new FileWriter(new File("HechizosJugadores.txt"));
+	for(int i = 0; i < count0; i++) {
+		for(int j = 0; j < count1; j++) {
+			if(spellMatrix[i][j] == true) {
+				save2.write(usersL[i]+", "+spellsL[j]);
+				save2.write("\r\n");
+			}
+		}
+	}
+	save2.close();
+	
+	FileWriter save3 = new FileWriter(new File("Enemigos.txt"));
+	for(int i = 0; i < count2; i++) {
+		save3.write(eNames[i]+", "+String.valueOf(eHPL[i])+", "+String.valueOf(eAttackL[i])+", "+eClassL[i]+", "+String.valueOf(eSpeedL[i]));
+		save3.write("\r\n");
+	}
+	save3.close();
+	
+}
+}
+
